@@ -1,5 +1,14 @@
 import React, {useRef, useState} from 'react';
-import {View, Text, StyleSheet, Animated, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  TouchableOpacity,
+  Platform,
+  PermissionsAndroid,
+  Alert,
+} from 'react-native';
 import VideoPlayer from 'react-native-video';
 import {PinchGestureHandler, State} from 'react-native-gesture-handler';
 import ImageViewer from 'react-native-image-zoom-viewer';
@@ -8,6 +17,12 @@ import Icons from '../Icons';
 import Sticker from '../components/Sticker';
 import DisplaySticker from '../components/DisplaySticker';
 import {useSharedValue} from 'react-native-reanimated';
+import Draggable from 'react-native-draggable';
+import ViewShot, {captureRef} from 'react-native-view-shot';
+import {PERMISSIONS, request} from 'react-native-permissions';
+import RNFS from 'react-native-fs';
+import {CameraRoll} from '@react-native-camera-roll/camera-roll';
+import LinearGradient from 'react-native-linear-gradient';
 
 const Edit = ({route}) => {
   const {mediaUri} = route.params;
@@ -15,8 +30,10 @@ const Edit = ({route}) => {
   const [stickers, setStickers] = useState([]); // Stickers state
   const [showStickers, setShowStickers] = useState(false);
 
-  const translateX = stickers.map(() => useSharedValue(0));
-  const translateY = stickers.map(() => useSharedValue(0));
+  const imageViewRef = useRef();
+
+  // const translateX = stickers.map(() => useSharedValue(0));
+  // const translateY = stickers.map(() => useSharedValue(0));
 
   console.log(stickers);
 
@@ -37,6 +54,64 @@ const Edit = ({route}) => {
   const handleCloseStickers = () => {
     setShowStickers(false);
   };
+
+  // Handle permission request for WRITE_EXTERNAL_STORAGE
+  const requestStoragePermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'File and Media Permission',
+          message: 'so you can save it.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can save it');
+        saveScreenshot();
+      } else {
+        console.log('permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const saveScreenshot = async () => {
+    try {
+      const uri = await captureRef(imageViewRef, {
+        format: 'png',
+        quality: 0.8,
+      });
+
+      if (mediaUri.endsWith('.mp4')) {
+        await CameraRoll.save(mediaUri, {type: 'video', album: 'PixyRight'});
+      } else await CameraRoll.save(uri, {type: 'photo', album: 'PixyRight'});
+
+      Alert.alert('Saved to the gallery');
+
+      console.log('Screenshot saved to internal storage:', uri);
+    } catch (error) {
+      console.error('Error saving screenshot:', error);
+    }
+  };
+
+  const renderDraggable = (sticker, index) => (
+    <Draggable key={index} x={10} y={10} renderSize={80} renderColor="black">
+      <LinearGradient
+        colors={['#CB9D06', '#FFC300', '#CB9D06']}
+        style={[styles.sticker]}>
+        <DisplaySticker
+          key={index}
+          field={sticker}
+          onPress={() => handleRemoveSticker(index)}
+        />
+        <Text style={{color: 'black', minWidth: 60}}>{sticker.value}</Text>
+      </LinearGradient>
+    </Draggable>
+  );
 
   return (
     <View
@@ -61,11 +136,12 @@ const Edit = ({route}) => {
             paddingHorizontal: 12,
             paddingVertical: 5,
             borderRadius: 8,
-          }}>
+          }}
+          onPress={requestStoragePermission}>
           <Text style={{color: 'black'}}>Save</Text>
         </TouchableOpacity>
       </View>
-      <View style={{flex: 1}}>
+      <ViewShot ref={imageViewRef} style={{flex: 1}}>
         {mediaUri && mediaUri.endsWith('.jpg') ? (
           <ImageViewer
             imageUrls={images}
@@ -87,23 +163,29 @@ const Edit = ({route}) => {
         )}
 
         {/* Render selected stickers */}
-        {stickers.map((sticker, index) => (
-          <Animated.View
-            key={index}
-            style={[
-              styles.sticker,
-              {left: translateX[index].value, top: translateY[index].value},
-            ]}>
-            <DisplaySticker
-              key={index}
-              field={sticker}
-              onPress={() => handleRemoveSticker(index)}
-            />
-            <Text style={{color: 'black', minWidth: 60}}>{sticker.value}</Text>
-            {/* Render sticker image here if applicable */}
-          </Animated.View>
-        ))}
-      </View>
+        {stickers.map((sticker, index) =>
+          // <Draggable
+          //   key={index}
+          //   x={10}
+          //   y={10}
+          //   renderSize={80}
+          //   renderColor="black">
+          //   <LinearGradient
+          //     colors={['#CB9D06', '#FFC300', '#CB9D06']}
+          //     style={[styles.sticker]}>
+          //     <DisplaySticker
+          //       key={index}
+          //       field={sticker}
+          //       onPress={() => handleRemoveSticker(index)}
+          //     />
+          //     <Text style={{color: 'black', minWidth: 60}}>
+          //       {sticker.value}
+          //     </Text>
+          //   </LinearGradient>
+          // </Draggable>
+          renderDraggable(sticker, index),
+        )}
+      </ViewShot>
 
       <View
         style={{
@@ -237,9 +319,7 @@ const styles = StyleSheet.create({
   sticker: {
     position: 'absolute',
     paddingHorizontal: 10,
-    backgroundColor: 'yellow', // Change to sticker background color
-    borderWidth: 1,
-    borderColor: 'black', // Change to sticker border color
+    // backgroundColor: '#CB9D06', // Change to sticker background color
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,

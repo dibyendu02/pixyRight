@@ -15,11 +15,11 @@ const DisplaySticker = ({field, onPress}) => {
           color="black"
         />
       ) : field.icon === 'tiktok' || field.icon === 'ebay' ? (
-        <Icons.FontAwesome5 name={`${field.icon}`} size={20} color="black" />
+        <Icons.FontAwesome5 name={`${field.icon}`} size={20} color="white" />
       ) : field.icon === 'signature' ? (
-        <Icons.FontAwesome5 name={`${field.icon}`} size={20} color="black" />
+        <Icons.FontAwesome5 name={`${field.icon}`} size={20} color="white" />
       ) : (
-        <Icons.FontAwesome name={`${field.icon}`} size={20} color="black" />
+        <Icons.FontAwesome name={`${field.icon}`} size={20} color="white" />
       )}
     </TouchableOpacity>
   );
@@ -27,13 +27,14 @@ const DisplaySticker = ({field, onPress}) => {
 
 const styles = StyleSheet.create({
   stickerIcon: {
-    backgroundColor: 'yellow',
-    width: 20,
-    height: 20,
+    backgroundColor: '#CB9D06',
+    width: 25,
+    height: 25,
     borderRadius: 50,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 2,
   },
 });
 

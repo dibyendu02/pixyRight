@@ -11,6 +11,7 @@ import React, {useState} from 'react';
 import Icons from '../Icons';
 import {useSections} from '../context/SectionsContext';
 import {useNavigation} from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
 
 const SavedTexts = () => {
   const {sections, setSections} = useSections();
@@ -93,33 +94,46 @@ const SavedTexts = () => {
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}>
-                  {field.icon === 'web' ||
-                  field.icon === 'email' ||
-                  field.icon === 'format-text' ? (
-                    <Icons.MaterialCommunityIcons
-                      name={`${field.icon}`}
-                      size={25}
-                      color="black"
-                    />
-                  ) : field.icon === 'tiktok' || field.icon === 'ebay' ? (
-                    <Icons.FontAwesome5
-                      name={`${field.icon}`}
-                      size={25}
-                      color="black"
-                    />
-                  ) : field.icon === 'signature' ? (
-                    <Icons.FontAwesome5
-                      name={`${field.icon}`}
-                      size={25}
-                      color="black"
-                    />
-                  ) : (
-                    <Icons.FontAwesome
-                      name={`${field.icon}`}
-                      size={25}
-                      color="black"
-                    />
-                  )}
+                  <LinearGradient
+                    colors={['#CB9D06', 'white', '#CB9D06']}
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 0}}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 50,
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    {field.icon === 'web' ||
+                    field.icon === 'email' ||
+                    field.icon === 'format-text' ? (
+                      <Icons.MaterialCommunityIcons
+                        name={`${field.icon}`}
+                        size={25}
+                        color="black"
+                      />
+                    ) : field.icon === 'tiktok' || field.icon === 'ebay' ? (
+                      <Icons.FontAwesome5
+                        name={`${field.icon}`}
+                        size={25}
+                        color="black"
+                      />
+                    ) : field.icon === 'signature' ? (
+                      <Icons.FontAwesome5
+                        name={`${field.icon}`}
+                        size={25}
+                        color="black"
+                      />
+                    ) : (
+                      <Icons.FontAwesome
+                        name={`${field.icon}`}
+                        size={25}
+                        color="black"
+                      />
+                    )}
+                  </LinearGradient>
                 </View>
                 <TextInput
                   style={styles.input}

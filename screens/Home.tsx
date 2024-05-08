@@ -1,5 +1,5 @@
 import {Share, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Icons from '../Icons';
 import {useNavigation} from '@react-navigation/native';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -34,6 +34,10 @@ const Home = () => {
       .then(result => console.log(result))
       .catch(error => console.log(error));
   };
+
+  useEffect(() => {
+    setOpenDialog(false);
+  }, []);
 
   return (
     <View style={{flex: 1, backgroundColor: '#222222'}}>
