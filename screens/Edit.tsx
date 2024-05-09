@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -23,14 +23,45 @@ import {PERMISSIONS, request} from 'react-native-permissions';
 import RNFS from 'react-native-fs';
 import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 import LinearGradient from 'react-native-linear-gradient';
+import Slider from '@react-native-community/slider';
+import ColorPicker from 'react-native-wheel-color-picker';
 
 const Edit = ({route}) => {
   const {mediaUri} = route.params;
   const {sections} = useSections();
   const [stickers, setStickers] = useState([]); // Stickers state
   const [showStickers, setShowStickers] = useState(false);
+  const [showSlider, setShowSlider] = useState(false);
+  const [brightness, setBrightness] = useState(1);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [textColor, setTextColor] = useState('white');
+  const [showFontPicker, setShowFontPicker] = useState(false);
+
+  const fonts = [
+    'Arial',
+    'Times New Roman',
+    'Georgia',
+    'Courier',
+    'Spacemono',
+    'Poppins',
+    'Raleway',
+    'Montserrant',
+    'MarckScript',
+    'SeaweedScript',
+    'PiyonScript',
+    'KaushanScript',
+    'StyleScript',
+    'DancingScript',
+  ];
 
   const imageViewRef = useRef();
+  const colorPickerRef = useRef();
+
+  useEffect(() => {
+    setShowColorPicker(false);
+  }, [textColor]);
+
+  console.log(textColor);
 
   // const translateX = stickers.map(() => useSharedValue(0));
   // const translateY = stickers.map(() => useSharedValue(0));
@@ -108,7 +139,15 @@ const Edit = ({route}) => {
           field={sticker}
           onPress={() => handleRemoveSticker(index)}
         />
-        <Text style={{color: 'black', minWidth: 60}}>{sticker.value}</Text>
+        <Text
+          style={{
+            color: textColor,
+            minWidth: 60,
+            fontWeight: '800',
+            opacity: brightness,
+          }}>
+          {sticker.value}
+        </Text>
       </LinearGradient>
     </Draggable>
   );
@@ -118,6 +157,8 @@ const Edit = ({route}) => {
       style={{
         flex: 1,
         backgroundColor: 'black',
+        position: 'relative',
+        zIndex: 1,
       }}>
       <View
         style={{
@@ -238,6 +279,9 @@ const Edit = ({route}) => {
               justifyContent: 'center',
               alignItems: 'center',
               borderRadius: 12,
+            }}
+            onPress={() => {
+              setShowFontPicker(true);
             }}>
             <Icons.MaterialCommunityIcons name="format-text" size={28} />
           </TouchableOpacity>
@@ -250,6 +294,9 @@ const Edit = ({route}) => {
               justifyContent: 'center',
               alignItems: 'center',
               borderRadius: 12,
+            }}
+            onPress={() => {
+              setShowSlider(true);
             }}>
             <Icons.Feather name="sun" size={28} />
           </TouchableOpacity>
@@ -262,6 +309,9 @@ const Edit = ({route}) => {
               justifyContent: 'center',
               alignItems: 'center',
               borderRadius: 12,
+            }}
+            onPress={() => {
+              setShowColorPicker(true);
             }}>
             <Icons.Ionicons name="color-fill-outline" size={28} />
           </TouchableOpacity>
@@ -292,6 +342,84 @@ const Edit = ({route}) => {
                 ))}
               </View>
             </View>
+          ))}
+        </View>
+      )}
+      {showSlider && (
+        <View
+          style={{
+            position: 'absolute',
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            zIndex: 10,
+            height: '100%',
+            width: '100%',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          {/* Slider for brightness adjustment */}
+          <Slider
+            style={styles.slider}
+            minimumValue={0} // Minimum brightness
+            maximumValue={1} // Maximum brightness
+            step={0.1} // Step size
+            value={brightness} // Current brightness level
+            onValueChange={value => setBrightness(value)} // Update brightness on change
+            onSlidingComplete={() => setShowSlider(false)}
+          />
+        </View>
+      )}
+      {showColorPicker && (
+        <View
+          style={{
+            position: 'absolute',
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            zIndex: 10,
+            height: '100%',
+            width: '100%',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            // alignItems: 'center',
+          }}>
+          <ColorPicker
+            ref={colorPickerRef}
+            color={textColor}
+            onColorChange={color => setTextColor(color)}
+            style={styles.colorPicker}
+            // onColorChangeComplete={color => {
+            //   setTextColor(color);
+            //   setShowColorPicker(false); // Close color picker when picking is complete
+            // }}
+          />
+        </View>
+      )}
+
+      {showFontPicker && (
+        <View
+          style={{
+            position: 'absolute',
+            backgroundColor: '#333333',
+            zIndex: 10,
+            height: '60%',
+            width: '100%',
+            flexDirection: 'column',
+            bottom: 0,
+            // justifyContent: 'center',
+            // alignItems: 'center',
+            padding: 20,
+            gap: 10,
+            paddingTop: 30,
+            borderTopRightRadius: 18,
+            borderTopLeftRadius: 18,
+          }}>
+          {fonts.map((font, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => {
+                setShowFontPicker(false);
+              }}>
+              <Text style={{color: 'white', fontSize: 14}}>{font}</Text>
+            </TouchableOpacity>
           ))}
         </View>
       )}
@@ -353,6 +481,17 @@ const styles = StyleSheet.create({
     top: 20,
     right: 20,
     zIndex: 999,
+  },
+  slider: {
+    width: '80%',
+    backgroundColor: '#333333',
+    paddingVertical: 15,
+    paddingHorizontal: 5,
+  },
+  colorPicker: {
+    position: 'absolute',
+    top: '25%',
+    height: 200, // Set the desired height of the color picker
   },
 });
 

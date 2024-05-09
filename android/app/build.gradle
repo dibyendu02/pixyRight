@@ -89,6 +89,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
@@ -97,11 +105,26 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+    // lintOptions {
+    //     // Enable lint checks during release builds
+    //     checkReleaseBuilds true
+        
+    //     // Set the severity level for lint warnings. Options: ignore, warning, error
+    //     // For example, to treat all lint warnings as errors:
+    //     // warningsAsErrors true
+        
+    //     // Define lint rules to be excluded or included
+    //     // For example, to exclude a specific lint rule:
+    //     // disable 'SpecificLintRule'
+    // }
+    // // Declare that ':app:copyReactNativeVectorIconFonts' must run before ':app:generateReleaseLintVitalReportModel'
+    // tasks.getByPath(':app:generateReleaseLintVitalReportModel').mustRunAfter(tasks.getByPath(':app:copyReactNativeVectorIconFonts'))
+
 }
 
 dependencies {
